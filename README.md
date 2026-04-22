@@ -4,6 +4,14 @@
 
 ---
 
+## Demo
+
+- Video walkthrough : https://www.loom.com/share/07df3a9b846c40ba9f3d36df75df057c
+- Live dashboard    : http://localhost:3001
+- API docs          : http://localhost:3001/api-docs
+
+---
+
 ## Overview
 
 This project demonstrates how Confidential Transactions on the Liquid Network can be combined with an off-chain compliance layer to satisfy FATF Travel Rule obligations — specifically Brazil's BCB Resolução 520 — without exposing sensitive financial data on a public ledger. The originating VASP submits identity data (IVMS 101) before broadcasting a Confidential Transaction; the blinding key required to decrypt on-chain amounts is stored under restricted access so regulators can verify the declared amount matches the actual transfer. Built as a proof-of-concept for the Plan ₿ Academy BSOS assignment, this repository is intentionally production-adjacent: real Liquid testnet transactions, real ZKP operations, and a compliance database designed around the principle of least privilege.
