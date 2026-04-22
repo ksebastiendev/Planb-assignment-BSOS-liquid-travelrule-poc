@@ -100,11 +100,11 @@ async function checkServer() {
 // ── Étape 2 : POST /transaction ───────────────────────────────────────────────
 
 async function stepPostTransaction() {
-  sep('ÉTAPE 2 · POST /transaction');
+  sep('STEP 2 · POST /transaction');
   console.log('');
   info(`Corridor  : ${C.bold}Brésil (BR) → Côte d'Ivoire (CI)${C.reset}`);
-  info(`Acteurs   : ${C.bold}João Silva${C.reset} → ${C.bold}Akosua Mensah${C.reset}`);
-  info(`Montant   : ${C.yellow}250 sat${C.reset} (tL-BTC testnet)`);
+  info(`Parties   : ${C.bold}João Silva${C.reset} → ${C.bold}Akosua Mensah${C.reset}`);
+  info(`Amount    : ${C.yellow}250 sat${C.reset} (tL-BTC testnet)`);
   info(`VASP orig : EuroExchange SA  |  VASP dest : AbidjanPay SARL`);
   console.log('');
 
@@ -127,7 +127,7 @@ async function stepPostTransaction() {
     toAddress: 'tlq1qqgz3mx8p5kqr7yw4nhd2sc9v1lj6f0tae37wkcq8ny4l5m7b3p4rs6tnk',
   };
 
-  process.stdout.write(`  ${C.grey}Envoi de la transaction…${C.reset} `);
+  process.stdout.write(`  ${C.grey}Sending transaction…${C.reset} `);
   const data = await httpPost('/transaction', payload);
   console.log(`${C.green}OK${C.reset}\n`);
 
@@ -138,7 +138,7 @@ async function stepPostTransaction() {
   kv('explorerUrl', data.explorerUrl, C.grey);
 
   if (data.demoMode) {
-    console.log(`\n  ${C.grey}ℹ  Mode démo — txid simulé (configurez VASP_PRIVATE_KEY pour un vrai broadcast)${C.reset}`);
+    console.log(`\n  ${C.grey}ℹ  Demo mode — simulated txid (set VASP_PRIVATE_KEY for a real broadcast)${C.reset}`);
   }
 
   console.log('');
@@ -152,7 +152,7 @@ async function stepPostTransaction() {
 // ── Étape 4 : GET /audit/:txid ────────────────────────────────────────────────
 
 async function stepAudit(txid) {
-  sep('ÉTAPE 4 · GET /audit/:txid');
+  sep('STEP 4 · GET /audit/:txid');
   console.log('');
   info(`txid : ${C.blue}${txid.slice(0, 24)}…${C.reset}`);
   console.log('');
@@ -186,8 +186,8 @@ async function stepAudit(txid) {
   console.log(`  ${C.bold}Blinding key${C.reset}`);
   const bkey = data.blindingKey || '—';
   kv('  Clé (extrait)', `${bkey.slice(0, 14)}…`, C.yellow);
-  kv('  Accès loggé',  String(data.accessLogged), data.accessLogged ? C.green : C.red);
-  kv('  Horodatage',   data.accessedAt || '—', C.grey);
+  kv('  Access logged', String(data.accessLogged), data.accessLogged ? C.green : C.red);
+  kv('  Timestamp',    data.accessedAt || '—', C.grey);
 
   console.log('');
   ok(`Accès réglementaire enregistré ${C.bold}✓${C.reset}`);
@@ -199,14 +199,14 @@ async function stepAudit(txid) {
 // ── Étape 5 : GET /verify/:txid ──────────────────────────────────────────────
 
 async function stepVerify(txid, blindingKey) {
-  sep('ÉTAPE 5 · GET /verify/:txid');
+  sep('STEP 5 · GET /verify/:txid');
   console.log('');
   info(`txid        : ${C.blue}${txid.slice(0, 24)}…${C.reset}`);
   info(`blindingKey : ${C.yellow}${(blindingKey || '').slice(0, 14)}…${C.reset}  ${C.grey}(lookup auto depuis DB)${C.reset}`);
   console.log('');
 
   // On passe sans ?blindingKey pour tester le lookup auto depuis DB
-  process.stdout.write(`  ${C.grey}Vérification on-chain…${C.reset} `);
+  process.stdout.write(`  ${C.grey}On-chain verification…${C.reset} `);
   const data = await httpGet('/verify/' + encodeURIComponent(txid));
   console.log(`${C.green}OK${C.reset}\n`);
 
@@ -215,14 +215,14 @@ async function stepVerify(txid, blindingKey) {
   const delta  = data.delta;
   const verif  = data.verified;
 
-  kv('Déclaré (IVMS101)', decAmt !== null && decAmt !== undefined ? `${decAmt.toLocaleString('fr-FR')} sat` : '—', C.white);
+  kv('Declared (IVMS101)', decAmt !== null && decAmt !== undefined ? `${decAmt.toLocaleString('fr-FR')} sat` : '—', C.white);
   kv('On-chain',          onAmt  !== null && onAmt  !== undefined ? `${onAmt.toLocaleString('fr-FR')} sat`  : 'N/A (démo)', C.white);
   kv('Delta',             delta  !== null ? `${delta} sat` : 'N/A (démo)', delta === 0 || delta === null ? C.green : C.red);
-  kv('Vérifié',           String(verif), verif ? C.green : C.red);
+  kv('Verified',          String(verif), verif ? C.green : C.red);
 
   console.log('');
   if (verif && (delta === 0 || delta === null)) {
-    console.log(`  ${C.green}${C.bold}✅ Vérification on-chain réussie${C.reset}`);
+    console.log(`  ${C.green}${C.bold}✅ On-chain verification successful${C.reset}`);
   } else {
     console.log(`  ${C.red}${C.bold}❌ Écart détecté — delta : ${delta} sat${C.reset}`);
   }
@@ -238,12 +238,12 @@ async function stepVerify(txid, blindingKey) {
 // ── Étape 6 : Récap & liens ───────────────────────────────────────────────────
 
 function stepRecap({ txid, recordId, explorerUrl }) {
-  sep('ÉTAPE 6 · Récapitulatif');
+  sep('STEP 6 · Summary');
   console.log('');
   kv('Record ID',    recordId,    C.cyan);
   kv('txid',         txid,        C.blue);
   kv('Explorer',     explorerUrl, C.blue);
-  kv('Dashboard',    'Ouvrez frontend/index.html dans un navigateur', C.grey);
+  kv('Dashboard',    'http://localhost:3001', C.grey);
   console.log('');
 }
 
@@ -264,7 +264,7 @@ async function main() {
   console.log(`  ${C.grey}API    : ${API}${C.reset}`);
   console.log('');
 
-  sep('ÉTAPE 1 · Vérification serveur');
+  sep('STEP 1 · Server check');
   console.log('');
 
   try {
@@ -314,8 +314,8 @@ async function main() {
   stepRecap({ txid, recordId, explorerUrl });
 
   sep();
-  console.log(`\n  ${C.green}${C.bold}Flow complet exécuté avec succès.${C.reset}`);
-  console.log(`  ${C.grey}Pour alimenter 5 transactions : node simulator/seed.js${C.reset}\n`);
+  console.log(`\n  ${C.green}${C.bold}Full flow completed successfully.${C.reset}`);
+  console.log(`  ${C.grey}To seed 5 transactions : node simulator/seed.js${C.reset}\n`);
 }
 
 main().catch(e => {
