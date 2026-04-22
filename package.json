@@ -1,0 +1,33 @@
+{
+  "name": "bsos-liquid-compliance",
+  "version": "0.1.0",
+  "description": "BSOS Travel Rule POC on Liquid Network testnet",
+  "main": "index.js",
+  "scripts": {
+    "start": "node --no-warnings=ExperimentalWarning index.js",
+    "dev": "nodemon --exec 'node --no-warnings=ExperimentalWarning' index.js",
+    "test": "node --no-warnings=ExperimentalWarning --test tests/esplora.test.js",
+    "test:integration": "node --no-warnings=ExperimentalWarning tests/integration.js",
+    "seed": "node simulator/seed.js",
+    "demo": "node demo.js"
+  },
+  "dependencies": {
+    "@bitcoinerlab/secp256k1": "^1.2.0",
+    "@vulpemventures/secp256k1-zkp": "^3.2.1",
+    "axios": "^1.6.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.0",
+    "ecpair": "^3.0.1",
+    "express": "^4.18.2",
+    "liquidjs-lib": "^6.0.2-liquid.37",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

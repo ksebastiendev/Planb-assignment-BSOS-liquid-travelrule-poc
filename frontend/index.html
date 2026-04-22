@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BSOS Compliance — Liquid Travel Rule</title>
+  <link rel="icon" href="BSOS logo-white.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & Base ─────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #0F1923;
+      --surface:    #162032;
+      --border:     #1E2D3D;
+      --text:       #FFFFFF;
+      --muted:      #8B9BB4;
+      --green:      #1D9E75;
+      --green-bg:   #0D3D2E;
+      --blue:       #2E86C1;
+      --blue-bg:    #0D2137;
+      --amber:      #BA7517;
+      --amber-bg:   #3D2B0D;
+      --red:        #E24B4A;
+      --mono:       'IBM Plex Mono', monospace;
+      --sans:       'Inter', system-ui, sans-serif;
+    }
+
+    html { font-size: 14px; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    /* ── Header ──────────────────────────────────────────────────────────── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-logo {
+      height: 32px;
+      width: auto;
+      display: block;
+    }
+
+    .header-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+
+    .btn-api-docs {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 14px;
+      border-radius: 6px;
+      border: 1px solid #8B9BB4;
+      background: transparent;
+      color: #8B9BB4;
+      font-size: 12px;
+      font-weight: 500;
+      font-family: var(--sans);
+      cursor: pointer;
+      text-decoration: none;
+      transition: color 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+    .btn-api-docs:hover {
+      color: #fff;
+      border-color: #fff;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge-testnet {
+      background: var(--blue);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 14px;
+      border-radius: 20px;
+      letter-spacing: 0.02em;
+    }
+
+    /* ── Main layout ─────────────────────────────────────────────────────── */
+    main {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 28px 24px 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* ── Stats bar ───────────────────────────────────────────────────────── */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px 22px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 10px;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .stat-value.green { color: var(--green); }
+
+    /* ── Section wrapper ─────────────────────────────────────────────────── */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .section-header {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .section-subtitle {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    /* ── Table ───────────────────────────────────────────────────────────── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead tr {
+      background: #111D2A;
+    }
+
+    thead th {
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    thead th.right { text-align: right; }
+    thead th.center { text-align: center; }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(46, 134, 193, 0.05); }
+    tbody tr.active-row { background: rgba(29, 158, 117, 0.07); }
+
+    td {
+      padding: 13px 16px;
+      font-size: 13px;
+      color: var(--text);
+      vertical-align: middle;
+    }
+
+    td.right { text-align: right; }
+    td.center { text-align: center; }
+
+    .record-id {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .txid-cell {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .txid-text {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .txid-link {
+      color: var(--muted);
+      opacity: 0.7;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      transition: opacity 0.15s, color 0.15s;
+    }
+
+    .txid-link:hover { opacity: 1; color: var(--blue); }
+
+    .amount-cell {
+      font-family: var(--mono);
+      font-weight: 500;
+      font-size: 13px;
+    }
+
+    /* Status badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      border: 1px solid;
+      text-transform: capitalize;
+      letter-spacing: 0.03em;
+    }
+
+    .badge-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+    }
+
+    .badge.verified  { background: var(--green-bg); color: var(--green); border-color: var(--green); }
+    .badge.confirmed { background: var(--blue-bg);  color: var(--blue);  border-color: var(--blue);  }
+    .badge.pending   { background: var(--amber-bg); color: var(--amber); border-color: var(--amber); }
+    .badge.verified .badge-dot  { background: var(--green); }
+    .badge.confirmed .badge-dot { background: var(--blue); }
+    .badge.pending .badge-dot   { background: var(--amber); }
+
+    .date-cell { color: var(--muted); font-size: 12px; }
+
+    /* Audit button */
+    .btn-audit {
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--sans);
+      transition: opacity 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn-audit:hover { opacity: 0.85; }
+    .btn-audit:active { opacity: 0.7; }
+
+    /* Loading / empty state */
+    .table-placeholder {
+      padding: 40px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Audit section ───────────────────────────────────────────────────── */
+    #section-audit { scroll-margin-top: 80px; }
+
+    .audit-body { padding: 24px; }
+
+    .audit-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .kyc-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+    }
+
+    .kyc-card-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .kyc-row { margin-bottom: 12px; }
+    .kyc-row:last-child { margin-bottom: 0; }
+
+    .kyc-label {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 3px;
+    }
+
+    .kyc-value {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      word-break: break-all;
+    }
+
+    .kyc-value.mono {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--muted);
+    }
+
+    /* Blinding key card */
+    .blinding-key-card {
+      background: #0A1018;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+    }
+
+    .bk-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 10px;
+    }
+
+    .bk-value {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--text);
+      word-break: break-all;
+      line-height: 1.6;
+    }
+
+    /* Green access banner */
+    .access-banner {
+      background: var(--green-bg);
+      border-left: 4px solid var(--green);
+      border-radius: 0 6px 6px 0;
+      padding: 14px 18px;
+    }
+
+    .access-banner-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--green);
+      margin-bottom: 4px;
+    }
+
+    .access-banner-sub {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* ── Verify section ──────────────────────────────────────────────────── */
+    .verify-body { padding: 24px; position: relative; }
+
+    .liquid-watermark {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      opacity: 0.08;
+      pointer-events: none;
+    }
+
+    .verify-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .verify-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px 22px;
+    }
+
+    .verify-card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 14px;
+    }
+
+    .verify-card-header svg { flex-shrink: 0; }
+
+    .verify-amount {
+      font-family: var(--mono);
+      font-size: 30px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .verify-source {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* Result banner */
+    .result-banner {
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .result-banner.verified-banner { background: var(--green); }
+    .result-banner.mismatch-banner { background: var(--red); }
+
+    .result-icon {
+      margin: 0 auto 10px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 2.5px solid rgba(255,255,255,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .result-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+
+    .result-delta {
+      font-size: 13px;
+      color: rgba(255,255,255,0.8);
+    }
+
+    /* ── Placeholder states ──────────────────────────────────────────────── */
+    .section-placeholder {
+      padding: 40px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .section-placeholder p { margin-top: 6px; font-size: 12px; opacity: 0.7; }
+
+    /* ── Error banner ────────────────────────────────────────────────────── */
+    .api-error {
+      background: rgba(226, 75, 74, 0.12);
+      border: 1px solid var(--red);
+      color: var(--red);
+      border-radius: 6px;
+      padding: 10px 16px;
+      font-size: 12px;
+      margin: 16px 24px;
+    }
+
+    /* ── Responsive ──────────────────────────────────────────────────────── */
+    @media (max-width: 1023px) {
+      .stats-bar { grid-template-columns: repeat(2, 1fr); }
+      .audit-grid, .verify-grid { grid-template-columns: 1fr; }
+      main { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ HEADER ══════════════════════════════════════════════════════════════ -->
+<header>
+  <div class="header-left">
+    <img src="BSOS logo-white.svg" alt="BSOS" class="header-logo" />
+    <span class="header-title">BSOS Compliance</span>
+  </div>
+  <div class="header-right">
+    <a class="btn-api-docs" href="/api-docs" target="_blank" rel="noopener">API Docs ↗</a>
+    <span class="badge-testnet">Liquid Testnet</span>
+  </div>
+</header>
+
+<!-- ══ MAIN ════════════════════════════════════════════════════════════════ -->
+<main>
+
+  <!-- §1 Stats bar -->
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="stat-label">Total Transactions</div>
+      <div class="stat-value" id="stat-total">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Confirmed</div>
+      <div class="stat-value green" id="stat-confirmed">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Verified On-chain</div>
+      <div class="stat-value green" id="stat-verified">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Volume USDt</div>
+      <div class="stat-value" id="stat-volume">—</div>
+    </div>
+  </div>
+
+  <!-- §2 Transactions table -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">Transactions</div>
+    </div>
+    <div id="table-container">
+      <div class="table-placeholder">
+        <span class="spinner"></span> Loading transactions…
+      </div>
+    </div>
+  </div>
+
+  <!-- §3 BCB Regulatory Audit -->
+  <div class="section" id="section-audit">
+    <div class="section-header">
+      <div class="section-title">BCB Regulatory Audit — Resolução 520</div>
+      <div class="section-subtitle" id="audit-subtitle">Select a transaction to inspect</div>
+    </div>
+    <div id="audit-container">
+      <div class="section-placeholder">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.4"><path d="M9 12h6m-3-3v6m9-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <p>Click <strong>Audit</strong> on any row to inspect its compliance record</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- §4 On-chain Verification -->
+  <div class="section" id="section-verify">
+    <div class="section-header">
+      <div class="section-title">On-chain Amount Verification</div>
+      <div class="section-subtitle">Liquid Network Confidential Transaction Validation</div>
+    </div>
+    <div id="verify-container">
+      <div class="section-placeholder">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.4"><path d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <p>Verification result will appear after an audit is triggered</p>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  'use strict';
+
+  const API = 'http://localhost:3001';
+  let _refreshTimer = null;
+  let _activeRow = null;
+
+  // ── Formatting ──────────────────────────────────────────────────────────────
+
+  function fmtAmount(sat) {
+    if (sat == null) return '—';
+    const usdt = sat / 100;
+    return usdt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' USDt';
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    try {
+      const d = new Date(iso);
+      return d.toLocaleDateString('en-GB') + ' ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    } catch { return iso; }
+  }
+
+  function fmtTxid(txid) {
+    if (!txid || txid.startsWith('demo-')) return txid || '—';
+    return txid.slice(0, 8) + '…';
+  }
+
+  function maskKey(key) {
+    if (!key) return '—';
+    if (key.startsWith('demo-')) return key.slice(0, 14) + '••••••••••••••••••' + key.slice(-4);
+    const start = key.slice(0, 8);
+    const end   = key.slice(-8);
+    return start + '••••••••••••••••••' + end;
+  }
+
+  function statusClass(status) {
+    if (!status) return 'pending';
+    const s = status.toLowerCase();
+    if (s === 'verified') return 'verified';
+    if (s === 'confirmed') return 'confirmed';
+    return 'pending';
+  }
+
+  function extractNames(record) {
+    const payload = record.ivms101_payload || {};
+
+    // Originator — persons are under originatingVASP.originator.originatorPersons
+    const origBlock   = payload.originatingVASP?.originator || {};
+    const origPersons = origBlock.originatorPersons || [];
+    const nameId      = origPersons[0]?.naturalPerson?.name?.nameIdentifier?.[0] || {};
+    const origName    = [nameId.secondaryIdentifier, nameId.primaryIdentifier].filter(Boolean).join(' ') || '—';
+    const origNatId   = origPersons[0]?.naturalPerson?.nationalIdentification || {};
+    const origCountry = origPersons[0]?.naturalPerson?.countryOfResidence || '';
+    // accountNumber is on the originator block (array of wallet addresses)
+    const origWallet  = origBlock.accountNumber?.[0] || '—';
+
+    // Beneficiary — persons are under beneficiaryVASP.beneficiary.beneficiaryPersons
+    const beneBlock   = payload.beneficiaryVASP?.beneficiary || {};
+    const benePersons = beneBlock.beneficiaryPersons || [];
+    const beneNameId  = benePersons[0]?.naturalPerson?.name?.nameIdentifier?.[0] || {};
+    const beneName    = [beneNameId.secondaryIdentifier, beneNameId.primaryIdentifier].filter(Boolean).join(' ') || '—';
+    const beneWallet  = beneBlock.accountNumber?.[0] || '—';
+    // Derive a display account ref from wallet (last 12 chars as ref)
+    const beneAcct    = beneWallet !== '—' ? beneWallet.slice(-12) + '…' : '—';
+
+    return { origName, origNatId, origCountry, origWallet, beneName, beneAcct, beneWallet };
+  }
+
+  // ── API helpers ──────────────────────────────────────────────────────────────
+
+  async function apiFetch(path) {
+    const res = await fetch(API + path);
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `HTTP ${res.status}`);
+    }
+    return res.json();
+  }
+
+  // ── Stats & table ────────────────────────────────────────────────────────────
+
+  async function loadTransactions() {
+    try {
+      const records = await apiFetch('/transaction');
+      const originations = records.filter(r => r.corridor_step === 'origination');
+      renderStats(originations);
+      renderTable(originations);
+    } catch (e) {
+      document.getElementById('table-container').innerHTML =
+        `<div class="api-error">API unavailable — ${e.message}</div>`;
+      ['stat-total','stat-confirmed','stat-verified','stat-volume'].forEach(id => {
+        document.getElementById(id).textContent = '—';
+      });
+    }
+  }
+
+  function renderStats(records) {
+    const total     = records.length;
+    const confirmed = records.filter(r => ['confirmed','verified'].includes((r.status||'').toLowerCase())).length;
+    const verified  = records.filter(r => (r.status||'').toLowerCase() === 'verified').length;
+    const volume    = records.reduce((s, r) => s + (r.amount_declared || 0), 0);
+
+    document.getElementById('stat-total').textContent     = total;
+    document.getElementById('stat-confirmed').textContent = confirmed;
+    document.getElementById('stat-verified').textContent  = verified;
+    document.getElementById('stat-volume').textContent    =
+      (volume / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function renderTable(records) {
+    if (!records.length) {
+      document.getElementById('table-container').innerHTML =
+        `<div class="table-placeholder">No transactions yet — run <code>npm run seed</code></div>`;
+      return;
+    }
+
+    const rows = records.map((r, i) => {
+      const txid      = r.txid || '';
+      const isDemo    = txid.startsWith('demo-');
+      const explorerUrl = `https://blockstream.info/liquidtestnet/tx/${txid}`;
+      const sc        = statusClass(r.status);
+
+      const txidCell = isDemo
+        ? `<span class="txid-text">${txid.slice(0, 8)}…</span>`
+        : `<span class="txid-text">${fmtTxid(txid)}</span>
+           <a class="txid-link" href="${explorerUrl}" target="_blank" rel="noopener" title="View on explorer">
+             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+           </a>`;
+
+      return `<tr data-idx="${i}" data-txid="${txid}" data-id="${r.id}">
+        <td><span class="record-id">${(r.id||'').slice(0,16)}…</span></td>
+        <td><div class="txid-cell">${txidCell}</div></td>
+        <td class="right"><span class="amount-cell">${fmtAmount(r.amount_declared)}</span></td>
+        <td class="center"><span class="badge ${sc}"><span class="badge-dot"></span>${r.status || 'pending'}</span></td>
+        <td class="date-cell">${fmtDate(r.created_at)}</td>
+        <td class="center"><button class="btn-audit" data-txid="${txid}" data-id="${r.id}">Audit</button></td>
+      </tr>`;
+    }).join('');
+
+    document.getElementById('table-container').innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>Record ID</th>
+            <th>Txid</th>
+            <th class="right">Amount</th>
+            <th class="center">Status</th>
+            <th>Date</th>
+            <th class="center">Action</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+
+    document.querySelectorAll('.btn-audit').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const txid = btn.dataset.txid;
+        const id   = btn.dataset.id;
+        highlightRow(txid);
+        triggerAudit(txid, id);
+      });
+    });
+  }
+
+  function highlightRow(txid) {
+    if (_activeRow) _activeRow.classList.remove('active-row');
+    const row = document.querySelector(`tr[data-txid="${txid}"]`);
+    if (row) { row.classList.add('active-row'); _activeRow = row; }
+  }
+
+  // ── Audit ────────────────────────────────────────────────────────────────────
+
+  async function triggerAudit(txid, recordId) {
+    // Loading states
+    document.getElementById('audit-subtitle').textContent = `Transaction: ${recordId || txid}`;
+    document.getElementById('audit-container').innerHTML = loadingHTML('Loading compliance record…');
+    document.getElementById('verify-container').innerHTML = loadingHTML('Loading verification…');
+
+    document.getElementById('section-audit').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // Parallel fetch: audit + verify
+    let auditData, verifyData;
+    const [auditResult, verifyResult] = await Promise.allSettled([
+      apiFetch('/audit/' + encodeURIComponent(txid)),
+      apiFetch('/verify/' + encodeURIComponent(txid)),
+    ]);
+
+    if (auditResult.status === 'rejected') {
+      document.getElementById('audit-container').innerHTML =
+        `<div class="api-error">${auditResult.reason?.message || 'Audit failed'}</div>`;
+    } else {
+      auditData = auditResult.value;
+      renderAudit(auditData);
+    }
+
+    if (verifyResult.status === 'rejected') {
+      document.getElementById('verify-container').innerHTML =
+        `<div class="api-error">${verifyResult.reason?.message || 'Verification failed'}</div>`;
+    } else {
+      verifyData = verifyResult.value;
+      renderVerify(verifyData);
+    }
+  }
+
+  function renderAudit(data) {
+    const record = data.record || {};
+    const { origName, origNatId, origCountry, origWallet, beneName, beneAcct, beneWallet } = extractNames(record);
+
+    const cpfType = origNatId.nationalIdentifierType === 'TAXID' ? 'CPF / Tax ID' : (origNatId.nationalIdentifierType || 'ID');
+    const cpfVal  = origNatId.nationalIdentifier || '—';
+
+    document.getElementById('audit-container').innerHTML = `
+      <div class="audit-body">
+        <div class="audit-grid">
+          <!-- Originator -->
+          <div class="kyc-card">
+            <div class="kyc-card-title">Originator KYC</div>
+            <div class="kyc-row">
+              <div class="kyc-label">Name</div>
+              <div class="kyc-value">${esc(origName)}</div>
+            </div>
+            <div class="kyc-row">
+              <div class="kyc-label">${esc(cpfType)}</div>
+              <div class="kyc-value">${esc(cpfVal)}</div>
+            </div>
+            <div class="kyc-row">
+              <div class="kyc-label">Country of Residence</div>
+              <div class="kyc-value" style="font-weight:400">${esc(origCountry || '—')}</div>
+            </div>
+            <div class="kyc-row">
+              <div class="kyc-label">Wallet</div>
+              <div class="kyc-value mono">${esc(origWallet)}</div>
+            </div>
+          </div>
+          <!-- Beneficiary -->
+          <div class="kyc-card">
+            <div class="kyc-card-title">Beneficiary KYC</div>
+            <div class="kyc-row">
+              <div class="kyc-label">Name</div>
+              <div class="kyc-value">${esc(beneName)}</div>
+            </div>
+            <div class="kyc-row">
+              <div class="kyc-label">Account</div>
+              <div class="kyc-value">${esc(beneAcct)}</div>
+            </div>
+            <div class="kyc-row">
+              <div class="kyc-label">Wallet</div>
+              <div class="kyc-value mono">${esc(beneWallet)}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Blinding key -->
+        <div class="blinding-key-card">
+          <div class="bk-label">Blinding Key (Confidential Transaction)</div>
+          <div class="bk-value">${esc(maskKey(data.blindingKey))}</div>
+        </div>
+
+        <!-- Access banner -->
+        <div class="access-banner">
+          <div class="access-banner-title">Access logged — Art. 44 BCB Resolution 520</div>
+          <div class="access-banner-sub">Regulatory access to confidential transaction data has been recorded for audit trail compliance.</div>
+        </div>
+      </div>`;
+  }
+
+  // ── Verify ───────────────────────────────────────────────────────────────────
+
+  function renderVerify(data) {
+    const decAmt  = data.declared?.amount ?? null;
+    const onAmt   = data.onchain?.amount  ?? null;
+    const delta   = data.delta;
+    const verified = data.verified;
+
+    const decFmt = decAmt !== null ? fmtAmount(decAmt) : '— USDt';
+    const onFmt  = onAmt  !== null ? fmtAmount(onAmt)  : decFmt; // demo: mirror declared
+
+    const deltaFmt = delta !== null
+      ? (delta / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' USDt'
+      : '0.00 USDt';
+
+    const resultBanner = verified
+      ? `<div class="result-banner verified-banner">
+           <div class="result-icon">
+             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+           </div>
+           <div class="result-title">VERIFIED</div>
+           <div class="result-delta">Delta: ${deltaFmt}</div>
+         </div>`
+      : `<div class="result-banner mismatch-banner">
+           <div class="result-icon">
+             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+           </div>
+           <div class="result-title">MISMATCH DETECTED</div>
+           <div class="result-delta">Delta: ${deltaFmt}</div>
+         </div>`;
+
+    document.getElementById('verify-container').innerHTML = `
+      <div class="verify-body">
+        <!-- Liquid watermark -->
+        <div class="liquid-watermark">
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+            <circle cx="40" cy="40" r="38" stroke="white" stroke-width="2"/>
+            <text x="40" y="54" text-anchor="middle" font-family="Inter,sans-serif" font-size="36" font-weight="700" fill="white">L</text>
+          </svg>
+        </div>
+
+        <div class="verify-grid">
+          <!-- Declared -->
+          <div class="verify-card">
+            <div class="verify-card-header">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Declared (IVMS101)
+            </div>
+            <div class="verify-amount">${decFmt}</div>
+            <div class="verify-source">Source: Travel Rule Message</div>
+          </div>
+          <!-- On-chain -->
+          <div class="verify-card">
+            <div class="verify-card-header">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.05 12C2.28 6.95 6.95 3 12.5 3S22.72 6.95 23.95 12C22.72 17.05 18.05 21 12.5 21S2.28 17.05 1.05 12z"/><circle cx="12.5" cy="12" r="3"/></svg>
+              On-chain (Liquid Network)
+            </div>
+            <div class="verify-amount">${onFmt}</div>
+            <div class="verify-source">Source: Unblinded CT Output</div>
+          </div>
+        </div>
+
+        ${resultBanner}
+      </div>`;
+  }
+
+  // ── Utilities ────────────────────────────────────────────────────────────────
+
+  function loadingHTML(msg) {
+    return `<div class="table-placeholder"><span class="spinner"></span>${msg}</div>`;
+  }
+
+  function esc(str) {
+    return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── Init ─────────────────────────────────────────────────────────────────────
+
+  async function init() {
+    await loadTransactions();
+    clearInterval(_refreshTimer);
+    _refreshTimer = setInterval(loadTransactions, 30_000);
+  }
+
+  init();
+</script>
+</body>
+</html>
